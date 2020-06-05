@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Edificio Three Js</title>
+  </head>
+  <body>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script>
+
+var startTime = Date.now();
+init();
+animate();
+
+function init()
+{
+//Iniciar Pantalla Negra
+	scene = new THREE.Scene();
+	aspect = window.innerWidth / window.innerHeight;
+	camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.5, 1000 );
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+	//EDIFICIO - TORRE CN, CANADÁ
+
+//Piramide
+	var geoPiramide = new THREE.Geometry();
+	var res = 20.0;
+	for( var i = 0; i < res; i++)
+	{
+		for( var j = 0; j < res; j++)
+		{
+			var punto = new THREE.Vector3();
+			punto.x = (2.0 * (res - i) / res ) * Math.cos( ( j * 2.0 * Math.PI ) / res);
+			punto.y = ((35.0 * i)/ res) - 25; //Alto
+			punto.z = (2.0 * (res - i) / res ) * Math.sin( ( j * 2.0 * Math.PI ) / res) ;
+			geoPiramide.vertices.push( punto );
+		}
+	}
+
+//Esfera
+	var geoEsfera = new THREE.Geometry();
+	var res1 = 30.0;
+	for( var i = 0; i < res; i = i + 0.5)
+	{
+		for( var j = 0; j < res; j = j + 0.5)
+		{
+			var punto = new THREE.Vector3();
+			punto.x = (2.0 * (res - i) / res ) * Math.cos( ( j * 2.0 * Math.PI ) / res)
+			punto.y = Math.sin( ( ( j * i ) * 2.0 * Math.PI ) / res) + 4;
+			punto.z = (2.0 * (res - i) / res ) * Math.sin( ( j * 2.0 * Math.PI ) / res);
+			geoEsfera.vertices.push( punto );
+		}
+	}
+
+//Cilindro
+	var geoCilindro = new THREE.Geometry();
+	var res1 = 3.0;
+	for( var i = 0; i < res; i++)
+	{
+		for( var j = 0; j < res; j++)
+		{
+			var punto = new THREE.Vector3();
+			punto.x = Math.cos( ( j * 2.0 * Math.PI ) / res)/3;
+			punto.y = ((2.5 * i)/ res) + 5; //Alto
+			punto.z = Math.sin( ( j * 2.0 * Math.PI ) / res)/3;
+			geoCilindro.vertices.push( punto );
+		}
+	}
+
+ //Piramidita
+	var geoPiramidita = new THREE.Geometry();
+	var res = 10.0;
+	for( var i = 0; i < res; i++)
+	{
+		for( var j = 0; j < res; j++)
+		{
+			var punto = new THREE.Vector3();
+			punto.x = (2.0 * (res - i) / res ) * Math.cos( ( j * 2.0 * Math.PI )/ res)/ 5;
+			punto.y = ((2.0 * i)/ res) + 7.5; //Alto
+			punto.z = (2.0 * (res - i) / res ) * Math.sin( ( j * 2.0 * Math.PI )/ res)/ 5 ;
+			geoPiramidita.vertices.push( punto );
+		}
+	}
+	
+//Materiales           
+	var matPunto = new THREE.PointsMaterial( { color: 0xFFFFFF, size: 0.1 } );
+
+//Objetos
+	var piramide = new THREE.Points( geoPiramide, matPunto );
+	var esfera = new THREE.Points( geoEsfera, matPunto );
+	var cilindro = new THREE.Points( geoCilindro, matPunto );
+	var piramidita = new THREE.Points( geoPiramidita, matPunto );
+
+//Agregar a Escena
+	scene.add( piramide );
+	scene.add( esfera );
+	scene.add( cilindro );
+	scene.add( piramidita );
+
+//Posición Cámara
+	camera.position.x = 20;
+	camera.position.y = 10;	 
+	camera.position.z = 20;
+
+	camera.lookAt( origin );
+}
+
+//Renderizar
+function animate() 
+{
+	render();
+	requestAnimationFrame( animate );
+}
+    
+function render()
+{
+	var dtime = Date.now()-startTime; //Movimiento
+	camera.position.x = 10*Math.cos(dtime/10000); //Movimiento
+	camera.position.z = 10*Math.sin(dtime/10000);//Movimiento
+	camera.lookAt( 0, 0, 0 );
+	renderer.render( scene, camera );
+}
+
+    </script>
+  </body>
+</html

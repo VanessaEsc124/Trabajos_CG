@@ -1,0 +1,1162 @@
+ <!DOCTYPE html>
+<html>
+  <head>
+    <title> Lobo </title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script>
+		var scene, aspect, camera, renderer, controls;
+		var startTime = Date.now();
+        var fan;
+        var strip;
+
+        class TRIANGLE_FAN{
+        constructor( Geometria ){
+        this.geometria = Geometria;
+        console.log(this.geometria);
+        }
+        draw(){
+        for( var i=2; i<this.geometria.vertices.length; i++ ){
+        this.geometria.faces.push( new THREE.Face3(0,i-1,i) );
+        }
+        this.geometria.computeFaceNormals();
+        var materialFan = new THREE.MeshBasicMaterial( { color: 0x3333DD, side:THREE.DoubleSide } );
+        var fan = new THREE.Mesh( this.geometria, materialFan );
+        scene.add( fan );
+        }
+        }
+
+        class TRIANGLE_STRIP{
+        constructor( Geometria ){
+        this.geometria = Geometria;
+        console.log(this.geometria);
+        }
+        draw(){
+        for( var i=2; i<this.geometria.vertices.length; i++ ){
+        this.geometria.faces.push( new THREE.Face3(i-2,i-1,i) );
+        }
+        this.geometria.computeFaceNormals();
+        var materialStrip = new THREE.MeshBasicMaterial( { color: 0x3333DD, side:THREE.DoubleSide } );
+        var strip = new THREE.Mesh( this.geometria, materialStrip );
+        scene.add( strip );
+        }
+        }
+
+         	init();
+		animate();
+	
+		function init(){
+			//INICIALIZACIÓN DE LA ESCENA
+			scene = new THREE.Scene();
+                        scene.background = new THREE.Color( 0xAAAAAA );
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+                        controls = new THREE.OrbitControls( camera, renderer.domElement );
+			
+			//ELEMENTOS DE ESCENA
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			var colorRd = new THREE.Color( 0xAA6666 );
+		  	var colorGd = new THREE.Color( 0x66AA66 );
+		  	var colorBd = new THREE.Color( 0x6666AA );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+                        //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+                        gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+                        gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+                        gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+                        //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+                        var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+                        var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+                        var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+			
+			//CREAR ILUMINACIÓN
+                       var ambient = new THREE.AmbientLight( 0xffffff, 1 );
+                       scene.add( ambient );
+            
+                       var pointLight1 = new THREE.PointLight( 0xffffff, .2, 100 );
+                       pointLight1.position.set( 10, 10, -10 );
+                       scene.add( pointLight1 );
+			
+		       var pointLight2 = new THREE.PointLight( 0xffffff, .5, 100 );
+                       pointLight2.position.set( 20, 20, 20 );
+                       scene.add( pointLight2 );
+            
+
+//TRONCO 
+        var curve1 = new THREE.CubicBezierCurve3(
+        new THREE.Vector3( 0.181, 5.950, 4.186 ),   //0.181, 5.595, 4.186
+        new THREE.Vector3( 0.501, 5.845, 4.115 ),   //0.431, 5.845, 4.115
+        new THREE.Vector3( 0.530, 5.529, 4.068 ),   //0.752, 5.529, 4.068
+        new THREE.Vector3( 0.824, 4.742, 4.093 )
+        );
+        var curve2 = new THREE.CubicBezierCurve3(        
+        new THREE.Vector3( 0.005, 6.468, 3.331 ),
+        new THREE.Vector3( 1.299, 5.923, 2.157 ),
+        new THREE.Vector3( 1.099, 4.921, 1.834 ),
+        new THREE.Vector3( 0.093, 4.172, 2.356 ) 
+        );
+        
+        var curve3 = new THREE.CubicBezierCurve3(          
+        new THREE.Vector3( 0.005, 6.468, 3.331 ),
+        new THREE.Vector3( 1.299, 5.923, 2.157 ),
+        new THREE.Vector3( 1.099, 4.921, 1.834 ),
+        new THREE.Vector3( -0.293, 4.172, 2.356 ) 
+        );
+        var curve4 = new THREE.CubicBezierCurve3(       
+        new THREE.Vector3( -0.013, 6.938, -0.874 ),
+        new THREE.Vector3( 2.135, 6.053, -0.673 ),   //1.135, 6.053, -0.673
+        new THREE.Vector3( 1.145, 4.080, -0.747 ),  //0.765, 4.080, -0.747 
+        new THREE.Vector3( -0.483, 3.460, -1.588 )
+        );
+        
+        var curve5 = new THREE.CubicBezierCurve3(        
+        new THREE.Vector3( -0.013, 6.938, -0.874 ),
+        new THREE.Vector3( 2.135, 6.053, -0.673 ),   //1.135, 6.053, -0.673
+        new THREE.Vector3( 1.145, 4.080, -0.747 ),  //0.765, 4.080, -0.747 
+        new THREE.Vector3( -0.483, 3.460, -1.588 )
+        );
+        var curve6 = new THREE.CubicBezierCurve3(          
+        new THREE.Vector3( 0.099, 7.458, -1.798 ),
+        new THREE.Vector3( 1.290, 6.471, -2.205 ),   //1.200, 6.471, -2.205
+        new THREE.Vector3( 1.592, 4.487, -2.544 ),  //0.992, 4.487, -2.544
+        new THREE.Vector3( -0.539, 4.395, -3.507 )  //-0.011, 4.395, -3.207
+        );
+
+        /**/
+         
+        var curve7 = new THREE.CubicBezierCurve3(
+        new THREE.Vector3( 0.181, 5.955, 4.186 ),   //0.181, 5.595, 4.186
+        new THREE.Vector3( -0.651, 5.845, 4.115 ),   //0.431, 5.845, 4.115
+        new THREE.Vector3( -0.530, 5.529, 4.068 ),   //0.752, 5.529, 4.068
+        new THREE.Vector3( 0.824, 4.742, 4.093 )
+        );
+        var curve8 = new THREE.CubicBezierCurve3(           
+        new THREE.Vector3( 0.005, 6.468, 3.331 ),
+        new THREE.Vector3( -1.550, 5.923, 2.157 ),  //-1.299, 5.923, 2.157
+        new THREE.Vector3( -1.099, 4.921, 1.834 ),
+        new THREE.Vector3( 0.093, 4.172, 2.356 )         );  
+        
+        var curve9 = new THREE.CubicBezierCurve3(            
+        new THREE.Vector3( 0.005, 6.468, 3.331 ),
+        new THREE.Vector3( -1.550, 5.923, 2.157 ),  //-1.299, 5.923, 2.157
+        new THREE.Vector3( -1.099, 4.921, 1.834 ),
+        new THREE.Vector3( 0.093, 4.172, 2.356 )   
+        );
+        var curve10 = new THREE.CubicBezierCurve3(         
+        new THREE.Vector3( -0.013, 6.938, -0.874 ),
+        new THREE.Vector3( -2.135, 6.053, -0.673 ),   //1.135, 6.053, -0.673
+        new THREE.Vector3( -1.145, 4.080, -0.747 ),  //0.765, 4.080, -0.747 
+        new THREE.Vector3( -0.073, 3.460, -1.588 )
+        );
+        
+        var curve11 = new THREE.CubicBezierCurve3(         
+        new THREE.Vector3( -0.013, 6.938, -0.874 ),
+        new THREE.Vector3( -2.135, 6.053, -0.673 ),   //1.135, 6.053, -0.673
+        new THREE.Vector3( -1.145, 4.080, -0.747 ),  //0.765, 4.080, -0.747 
+        new THREE.Vector3( -0.073, 3.460, -1.588 )
+        );
+        var curve12 = new THREE.CubicBezierCurve3(          
+        new THREE.Vector3( 0.099, 7.458, -1.798 ),
+        new THREE.Vector3( -1.290, 6.471, -2.205 ),   //1.200, 6.471, -2.205
+        new THREE.Vector3( -1.592, 4.487, -2.544 ),  //0.992, 4.487, -2.544
+        new THREE.Vector3( -0.011, 4.395, -3.507 )
+        );
+       
+        var res = 20;
+        
+        var pointGeometry = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point = curve1.getPoint( i/res );
+        pointGeometry.vertices.push( point );
+        }               
+        for(var i=0; i<=res; i++){
+        var point = curve2.getPoint( i/res );
+        pointGeometry.vertices.push( point );
+        }     
+        
+        var pointGeometry1 = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point1 = curve3.getPoint( i/res );
+        pointGeometry1.vertices.push( point1 );
+        }                
+        for(var i=0; i<=res; i++){
+        var point1 = curve4.getPoint( i/res );
+        pointGeometry1.vertices.push( point1 );
+        }     
+        
+        var pointGeometry2 = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point2 = curve5.getPoint( i/res );
+        pointGeometry2.vertices.push( point2 );
+        }                
+        for(var i=0; i<=res; i++){
+        var point2 = curve6.getPoint( i/res );
+        pointGeometry2.vertices.push( point2 );
+        }     
+        
+        var pointGeometry3 = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point3 = curve7.getPoint( i/res );
+        pointGeometry3.vertices.push( point3 );
+        }               
+        for(var i=0; i<=res; i++){
+        var point3 = curve8.getPoint( i/res );
+        pointGeometry3.vertices.push( point3 );
+        }     
+        
+        var pointGeometry4 = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point4 = curve9.getPoint( i/res );
+        pointGeometry4.vertices.push( point4 );
+        }                
+        for(var i=0; i<=res; i++){
+        var point4 = curve10.getPoint( i/res );
+        pointGeometry4.vertices.push( point4 );
+        }     
+        
+        var pointGeometry5 = new THREE.Geometry();
+        for(var i=0; i<res; i++){
+        var point5 = curve11.getPoint( i/res );
+        pointGeometry5.vertices.push( point5 );
+        }                
+        for(var i=0; i<=res; i++){
+        var point5 = curve12.getPoint( i/res );
+        pointGeometry5.vertices.push( point5 );
+        }
+        
+        pointGeometry3.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,0) );
+        pointGeometry4.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,0) );
+        pointGeometry5.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,0) );
+        
+        var pointMaterial = new THREE.PointsMaterial( { color: 0x00FF00 } );
+        pointMaterial.size = 0.1;
+        var curvePoints = new THREE.Points( pointGeometry, pointMaterial );
+        var curvePoints1 = new THREE.Points( pointGeometry1, pointMaterial );
+        var curvePoints2 = new THREE.Points( pointGeometry2, pointMaterial );
+        var curvePoints3 = new THREE.Points( pointGeometry3, pointMaterial );
+        var curvePoints4 = new THREE.Points( pointGeometry4, pointMaterial );
+        var curvePoints5 = new THREE.Points( pointGeometry5, pointMaterial );
+
+         var material = new THREE.MeshBasicMaterial( { 
+				color: 0xD8D8D8, 
+				metalness: 0.0, 
+				roughness: 5.1,
+				opacity: 50,
+				transparent: true, } );
+        material.side = THREE.DoubleSide;
+
+        //Strip
+        for(var i=0; i<res-1; i++){
+                var face1 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry.faces.push( face1 );
+                var face2 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry.faces.push( face2 );
+            }                
+        pointGeometry.computeFaceNormals();
+        
+            for(var i=0; i<res-1; i++){
+                var face3 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry1.faces.push( face3 );
+                var face4 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry1.faces.push( face4 );
+            }        
+        pointGeometry1.computeFaceNormals();
+        
+            for(var i=0; i<res-1; i++){
+                var face5 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry2.faces.push( face5 );
+                var face6 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry2.faces.push( face6 );
+            }        
+        pointGeometry2.computeFaceNormals();
+        
+            for(var i=0; i<res-1; i++){
+                var face7 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry3.faces.push( face7 );
+                var face8 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry3.faces.push( face8 );
+            }        
+        pointGeometry3.computeFaceNormals();
+        
+            for(var i=0; i<res-1; i++){
+                var face9 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry4.faces.push( face9 );
+                var face10 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry4.faces.push( face10 );
+            }        
+        pointGeometry4.computeFaceNormals();
+        
+            for(var i=0; i<res-1; i++){
+                var face11 = new THREE.Face3( i, i+1, i+res );
+                pointGeometry5.faces.push( face11 );
+                var face12 = new THREE.Face3( i+1, i+res, i+(res+1) );
+                pointGeometry5.faces.push( face12 );
+            }        
+        pointGeometry5.computeFaceNormals();
+
+        var malla = new THREE.Mesh( pointGeometry, material );
+        var malla1 = new THREE.Mesh( pointGeometry1, material );
+        var malla2 = new THREE.Mesh( pointGeometry2, material );
+        var malla3 = new THREE.Mesh( pointGeometry3, material );
+        var malla4 = new THREE.Mesh( pointGeometry4, material );
+        var malla5 = new THREE.Mesh( pointGeometry5, material );
+
+           
+        scene.add( malla );
+        scene.add( malla1 );
+        scene.add( malla2 );
+        scene.add( malla3 );
+        scene.add( malla4 );
+        scene.add( malla5 );
+        
+
+//CARA  
+            var curve2D = [];
+                curve2D[0] = new THREE.Vector3(-0.013906, 6.9382, -0.87409);   
+                curve2D[1] = new THREE.Vector3(-0.64147, 8.4592, -3.8123);
+                curve2D[2] = new THREE.Vector3(-0.70655, 7.9426, -3.7986);
+                curve2D[3] = new THREE.Vector3(-1.3626, 7.5858, -4.4833);
+                curve2D[4] = new THREE.Vector3(-1.29106, 7.2219, -4.9868);
+                curve2D[5] = new THREE.Vector3(-2.2606, 6.5875, -5.473);
+                curve2D[6] = new THREE.Vector3(-1.964, 6.2571, -5.3881);
+                curve2D[7] = new THREE.Vector3(-1.764, 6.1371, -5.3881);
+                curve2D[8] = new THREE.Vector3(-1.237, 5.959, -4.2011);
+                curve2D[9] = new THREE.Vector3(-0.0113, 4.3954, -3.2071);
+                curve2D[10] = new THREE.Vector3(-0.073973, 3.4603, -1.5888);
+
+                        curve2D.closed = true;
+
+			var shape = new THREE.Shape();
+			//shape.splineThru(curve2D);
+			shape.setFromPoints(curve2D);
+            
+            var material = new THREE.LineBasicMaterial( { color : 0x61380B } );
+            var resolution = 70;
+            var points = shape.getPoints( resolution );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            geometry.applyMatrix( new THREE.Matrix4().makeTranslation(-3,0.8,-0.7) );
+            geometry.rotateY(-1.5);
+
+         var material = new THREE.MeshBasicMaterial( { 
+				color: 0xD8D8D8, 
+				metalness: 0.5, 
+				roughness: 0.1,
+				opacity: 0.75,
+				transparent: false, } );
+        material.side = THREE.DoubleSide;       
+
+            //Create the final object to add to the scene
+            var curveObject = new THREE.Line( geometry, material );
+            
+			//EXTRUDE
+			var extrudeSettings = {
+				steps: 2,
+				amount: 1.4,
+				bevelEnabled: false,
+			};
+
+			
+                        var geometryCara = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+                        geometryCara.applyMatrix( new THREE.Matrix4().makeTranslation(-2.8,1,-1) );
+                        geometryCara.rotateY(-1.5);
+			var materialCara = new THREE.MeshBasicMaterial( { 
+				color: 0xD8D8D8, 
+				metalness: 0.0, 
+				roughness: 5.1,
+				opacity: 50,
+				transparent: true, } );
+			
+			var mesh = new THREE.Mesh( geometryCara, materialCara ) ;
+			scene.add( mesh );
+        
+		  	//AGREGAR A LA ESCENA
+                        scene.add( gridHelperXZ );
+		  	scene.add( arrowX );	
+		  	scene.add( arrowY );	
+		  	scene.add( arrowZ );
+			//scene.add( curveObject );
+
+//PATAS TRASERAS
+        
+        var PataAtras = new THREE.Geometry();    
+
+        var p0 = new THREE.Vector3(0.093, 4.172, 2.356);
+        var p1 = new THREE.Vector3(0.772, 3.013, 2.569);
+        var p2 = new THREE.Vector3(-0.011, 4.167, 3.089);
+        var p3 = new THREE.Vector3(0.856, 2.750, 3.820);
+        var p4 = new THREE.Vector3(0.024, 4.742, 4.093);
+        var p5 = new THREE.Vector3(0.856, 2.750, 3.820);
+        var p6 = new THREE.Vector3(0.752, 5.529, 4.068);
+        var p7 = new THREE.Vector3(1.070, 2.093, 3.580);
+        var p8 = new THREE.Vector3(1.148, 5.707, 2.798);
+        var p9 = new THREE.Vector3(1.070, 2.093, 3.580);
+        var p10 = new THREE.Vector3(1.223, 5.003, 2.192);
+        var p11 = new THREE.Vector3(1.070, 2.093, 3.580);
+        var p12 = new THREE.Vector3(0.767, 4.921, 1.834);
+        var p13 = new THREE.Vector3(0.772, 3.013, 2.569);
+        var p14 = new THREE.Vector3(0.093, 4.172, 2.356);
+        var p15 = new THREE.Vector3(0.856, 2.750, 3.820);
+        
+        var p16 = new THREE.Vector3(1.070, 2.093, 3.580);
+        var p17 = new THREE.Vector3(0.959, 2.138, 4.290);
+        var p18 = new THREE.Vector3(0.856, 2.750, 3.820);
+        var p19 = new THREE.Vector3(0.822, 2.046, 3.683);
+        var p20 = new THREE.Vector3(0.772, 3.013, 2.569);
+        var p21 = new THREE.Vector3(1.070, 2.093, 3.580);
+        
+        var p22 = new THREE.Vector3(0.929, 1.022, 3.727);
+        var p23 = new THREE.Vector3(0.822, 2.046, 3.683);
+        var p24 = new THREE.Vector3(0.852, 0.524, 4.069);
+        var p25 = new THREE.Vector3(0.959, 2.138, 4.290);
+        var p26 = new THREE.Vector3(1.188, 0.727, 4.019);
+        var p27 = new THREE.Vector3(1.070, 2.093, 3.580);
+        var p28 = new THREE.Vector3(0.929, 1.022, 3.727);
+        
+        var p29 = new THREE.Vector3(0.906, 0.638, 3.152);
+        var p30 = new THREE.Vector3(0.852, 0.524, 4.069);
+        var p31 = new THREE.Vector3(1.279, 0.471, 3.199);
+        var p32 = new THREE.Vector3(1.188, 0.727, 4.019);
+        var p33 = new THREE.Vector3(0.906, 0.638, 3.152);
+        var p34 = new THREE.Vector3(0.929, 1.022, 3.727);
+        
+        var p35 = new THREE.Vector3(-0.011, 4.167, 3.089);
+        var p36 = new THREE.Vector3(-0.789, 2.393, 3.628);
+        var p37 = new THREE.Vector3(0.024, 4.742, 4.093);
+        var p38 = new THREE.Vector3(-0.936, 2.849, 3.813);
+        var p39 = new THREE.Vector3(-0.814, 5.569, 4.011);
+        var p40 = new THREE.Vector3(-1.057, 1.928, 3.692);
+        var p41 = new THREE.Vector3(-1.325, 4.983, 2.288);
+        var p42 = new THREE.Vector3(-1.064, 3.176, 2.513);
+        var p43 = new THREE.Vector3(-0.628, 4.726, 1.905);
+        var p44 = new THREE.Vector3(-0.789, 2.393, 3.628);
+        var p45 = new THREE.Vector3(-0.093, 4.172, 2.356);
+        var p46 = new THREE.Vector3(-0.789, 2.393, 3.628);
+        var p47 = new THREE.Vector3(-0.011, 4.167, 3.089);
+        var p48 = new THREE.Vector3(-0.936, 2.849, 3.813);
+
+        var p49 = new THREE.Vector3(-0.979, 2.144, 4.282);
+        var p50 = new THREE.Vector3(-0.936, 2.849, 3.813);
+        var p51 = new THREE.Vector3(-1.057, 1.928, 3.692);
+        var p52 = new THREE.Vector3(-1.064, 3.176, 2.513);
+        var p53 = new THREE.Vector3(-0.789, 2.393, 3.628);
+        var p54 = new THREE.Vector3(-0.936, 2.849, 3.813);
+        var p55 = new THREE.Vector3(-0.979, 2.144, 4.282);
+        var p56 = new THREE.Vector3(-1.057, 1.928, 3.692);
+        
+        var p57 = new THREE.Vector3(-0.954, 1.034, 3.733);
+        var p58 = new THREE.Vector3(-0.979, 2.144, 4.282);
+        var p59 = new THREE.Vector3(-1.156, 0.976, 4.042);
+        var p60 = new THREE.Vector3(-0.979, 2.144, 4.282);
+        var p61 = new THREE.Vector3(-1.005, 0.483, 4.118);
+        var p62 = new THREE.Vector3(-0.789, 2.393, 3.628);
+        var p63 = new THREE.Vector3(-0.954, 1.034, 3.733);
+        var p64 = new THREE.Vector3(-1.057, 1.928, 3.692);
+        var p65 = new THREE.Vector3(-1.156, 0.976, 4.042);
+        var p66 = new THREE.Vector3(-0.979, 2.144, 4.282);
+        var p67 = new THREE.Vector3(-1.005, 0.483, 4.118);
+        
+        var p68 = new THREE.Vector3(-0.932, 0.603, 3.145);
+        var p69 = new THREE.Vector3(-0.954, 1.034, 3.733);
+        var p70 = new THREE.Vector3(-1.298, 0.514, 3.264);
+        var p71 = new THREE.Vector3(-1.156, 0.976, 4.042);
+        var p72 = new THREE.Vector3(-1.298, 0.514, 3.264);
+        var p73 = new THREE.Vector3(-1.005, 0.483, 4.118);
+        
+        var p74 = new THREE.Vector3(-0.628, 4.726, 1.905);
+        var p75 = new THREE.Vector3(-0.911, 5.463, 1.815);
+        var p76 = new THREE.Vector3(-1.325, 4.983, 2.288);
+        var p77 = new THREE.Vector3(-0.947, 5.872, 2.62);
+        var p78 = new THREE.Vector3(-0.814, 5.569, 4.011);
+        var p79 = new THREE.Vector3(-0.331, 5.757, 4.209);
+        var p80 = new THREE.Vector3(0.024, 4.742, 4.093);
+        var p81 = new THREE.Vector3(0.026, 5.341, 4.203);
+        var p82 = new THREE.Vector3(-0.331, 5.757, 4.209);
+        var p83 = new THREE.Vector3(-0.947, 5.872, 2.62);
+        var p84 = new THREE.Vector3(-0.814, 5.569, 4.011);
+        
+        var p85 = new THREE.Vector3(0.767, 4.921, 1.834);
+        var p86 = new THREE.Vector3(1.223, 5.003, 2.192);
+        var p87 = new THREE.Vector3(0.816, 5.923, 2.157);
+        var p88 = new THREE.Vector3(1.148, 5.707, 2.798);
+        var p89 = new THREE.Vector3(0.181, 5.995, 4.186);
+        var p90 = new THREE.Vector3(0.752, 5.529, 4.068);
+        var p91 = new THREE.Vector3(0.026, 5.341, 4.203);
+        var p92 = new THREE.Vector3(0.024, 4.742, 4.093);
+        var p93 = new THREE.Vector3(0.752, 5.529, 4.068);
+                
+        PataAtras.vertices.push(p0);
+        PataAtras.vertices.push(p1);
+        PataAtras.vertices.push(p2);
+        PataAtras.vertices.push(p3);
+        PataAtras.vertices.push(p4);
+        PataAtras.vertices.push(p5);
+        PataAtras.vertices.push(p6);
+        PataAtras.vertices.push(p7);
+        PataAtras.vertices.push(p8);
+        PataAtras.vertices.push(p9);
+        PataAtras.vertices.push(p10);
+        PataAtras.vertices.push(p11);
+        PataAtras.vertices.push(p12);
+        PataAtras.vertices.push(p13);
+        PataAtras.vertices.push(p14);
+        PataAtras.vertices.push(p15);
+
+        PataAtras.vertices.push(p16);
+        PataAtras.vertices.push(p17);
+        PataAtras.vertices.push(p18);
+        PataAtras.vertices.push(p19);
+        PataAtras.vertices.push(p20);
+        PataAtras.vertices.push(p21);
+        
+        PataAtras.vertices.push(p22);
+        PataAtras.vertices.push(p23);
+        PataAtras.vertices.push(p24);
+        PataAtras.vertices.push(p25);
+        PataAtras.vertices.push(p26);
+        PataAtras.vertices.push(p27);
+        PataAtras.vertices.push(p28);
+        
+        PataAtras.vertices.push(p29);
+        PataAtras.vertices.push(p30);
+        PataAtras.vertices.push(p31);
+        PataAtras.vertices.push(p32);
+        PataAtras.vertices.push(p33);        
+        PataAtras.vertices.push(p34);
+
+        PataAtras.vertices.push(p35);
+        PataAtras.vertices.push(p36);
+        PataAtras.vertices.push(p37);
+        PataAtras.vertices.push(p38);
+        PataAtras.vertices.push(p39);
+        PataAtras.vertices.push(p40);
+        PataAtras.vertices.push(p41);
+        PataAtras.vertices.push(p42);
+        PataAtras.vertices.push(p43);
+        PataAtras.vertices.push(p44);
+        PataAtras.vertices.push(p45);
+        PataAtras.vertices.push(p46);
+        PataAtras.vertices.push(p47);
+        PataAtras.vertices.push(p48);
+
+        PataAtras.vertices.push(p49);
+        PataAtras.vertices.push(p50);
+        PataAtras.vertices.push(p51);
+        PataAtras.vertices.push(p52);
+        PataAtras.vertices.push(p53);
+        PataAtras.vertices.push(p54);
+        PataAtras.vertices.push(p55);        
+        PataAtras.vertices.push(p56);
+
+        PataAtras.vertices.push(p57);
+        PataAtras.vertices.push(p58);
+        PataAtras.vertices.push(p59);
+        PataAtras.vertices.push(p60);
+        PataAtras.vertices.push(p61);
+        PataAtras.vertices.push(p62);        
+        PataAtras.vertices.push(p63);
+        PataAtras.vertices.push(p64);
+        PataAtras.vertices.push(p65);
+        PataAtras.vertices.push(p66);
+        PataAtras.vertices.push(p67);
+
+        PataAtras.vertices.push(p68);
+        PataAtras.vertices.push(p69);
+        PataAtras.vertices.push(p70);
+        PataAtras.vertices.push(p71);
+        PataAtras.vertices.push(p72);
+        PataAtras.vertices.push(p73);
+
+        PataAtras.vertices.push(p74);
+        PataAtras.vertices.push(p75);
+        PataAtras.vertices.push(p76);  
+        PataAtras.vertices.push(p77);
+        PataAtras.vertices.push(p78);
+        PataAtras.vertices.push(p79);
+        PataAtras.vertices.push(p80);
+        PataAtras.vertices.push(p81);    
+        PataAtras.vertices.push(p82);
+        PataAtras.vertices.push(p83);
+        PataAtras.vertices.push(p84);     
+        
+        PataAtras.vertices.push(p85);    
+        PataAtras.vertices.push(p86);
+        PataAtras.vertices.push(p87);
+        PataAtras.vertices.push(p88);
+        PataAtras.vertices.push(p89);    
+        PataAtras.vertices.push(p90);
+        PataAtras.vertices.push(p91);
+        PataAtras.vertices.push(p92);
+        PataAtras.vertices.push(p93);        
+        
+        PataAtras.faces.push( new THREE.Face3(0,1,2) );
+        PataAtras.faces.push( new THREE.Face3(1,2,3) );
+        PataAtras.faces.push( new THREE.Face3(2,3,4) );
+        PataAtras.faces.push( new THREE.Face3(3,4,5) );
+        PataAtras.faces.push( new THREE.Face3(4,5,6) );
+        PataAtras.faces.push( new THREE.Face3(5,6,7) );
+        PataAtras.faces.push( new THREE.Face3(6,7,8) );
+        PataAtras.faces.push( new THREE.Face3(7,8,9) );
+        PataAtras.faces.push( new THREE.Face3(8,9,10) );
+        PataAtras.faces.push( new THREE.Face3(9,10,11) );
+        PataAtras.faces.push( new THREE.Face3(10,11,12) );
+        PataAtras.faces.push( new THREE.Face3(11,12,13) );
+        PataAtras.faces.push( new THREE.Face3(12,13,14) );
+        PataAtras.faces.push( new THREE.Face3(13,14,15) );
+        
+        PataAtras.faces.push( new THREE.Face3(15,16,17) );
+        PataAtras.faces.push( new THREE.Face3(16,17,18) );
+        PataAtras.faces.push( new THREE.Face3(17,18,19) );
+        PataAtras.faces.push( new THREE.Face3(18,19,20) );
+        PataAtras.faces.push( new THREE.Face3(19,20,21) );
+        
+        PataAtras.faces.push( new THREE.Face3(21,22,23) );
+        PataAtras.faces.push( new THREE.Face3(22,23,24) );
+        PataAtras.faces.push( new THREE.Face3(23,24,25) );
+        PataAtras.faces.push( new THREE.Face3(24,25,26) );
+        PataAtras.faces.push( new THREE.Face3(25,26,27) );
+        PataAtras.faces.push( new THREE.Face3(26,27,28) );
+        
+        PataAtras.faces.push( new THREE.Face3(29,30,31) );
+        PataAtras.faces.push( new THREE.Face3(30,31,32) );
+        PataAtras.faces.push( new THREE.Face3(31,32,33) );
+        PataAtras.faces.push( new THREE.Face3(32,33,34) );
+        
+        PataAtras.faces.push( new THREE.Face3(35,36,37) );
+        PataAtras.faces.push( new THREE.Face3(36,37,38) );
+        PataAtras.faces.push( new THREE.Face3(37,38,39) );
+        PataAtras.faces.push( new THREE.Face3(38,39,40) );
+        PataAtras.faces.push( new THREE.Face3(39,40,41) );
+        PataAtras.faces.push( new THREE.Face3(40,41,42) );
+        PataAtras.faces.push( new THREE.Face3(41,42,43) );
+        PataAtras.faces.push( new THREE.Face3(42,43,44) );
+        PataAtras.faces.push( new THREE.Face3(43,44,45) );
+        PataAtras.faces.push( new THREE.Face3(44,45,46) );
+        PataAtras.faces.push( new THREE.Face3(45,46,47) );
+        PataAtras.faces.push( new THREE.Face3(46,47,48) );
+        
+        PataAtras.faces.push( new THREE.Face3(48,49,50) );
+        PataAtras.faces.push( new THREE.Face3(49,50,51) );
+        PataAtras.faces.push( new THREE.Face3(50,51,52) );
+        PataAtras.faces.push( new THREE.Face3(51,52,53) );
+        PataAtras.faces.push( new THREE.Face3(52,53,54) );
+        PataAtras.faces.push( new THREE.Face3(53,54,55) );
+        PataAtras.faces.push( new THREE.Face3(54,55,56) );
+        
+        PataAtras.faces.push( new THREE.Face3(56,57,58) );
+        PataAtras.faces.push( new THREE.Face3(57,58,59) );
+        PataAtras.faces.push( new THREE.Face3(58,59,60) );
+        PataAtras.faces.push( new THREE.Face3(59,60,61) );
+        PataAtras.faces.push( new THREE.Face3(60,61,62) );
+        PataAtras.faces.push( new THREE.Face3(61,62,63) );
+        PataAtras.faces.push( new THREE.Face3(62,63,64) );
+        PataAtras.faces.push( new THREE.Face3(63,64,65) );
+        PataAtras.faces.push( new THREE.Face3(64,65,66) );
+        PataAtras.faces.push( new THREE.Face3(65,66,67) );
+        
+        PataAtras.faces.push( new THREE.Face3(67,68,69) );
+        PataAtras.faces.push( new THREE.Face3(68,69,70) );
+        PataAtras.faces.push( new THREE.Face3(69,70,71) );
+        PataAtras.faces.push( new THREE.Face3(70,71,72) );
+        PataAtras.faces.push( new THREE.Face3(71,72,73) );
+        
+        PataAtras.faces.push( new THREE.Face3(74,75,76) );
+        PataAtras.faces.push( new THREE.Face3(75,76,77) );
+        PataAtras.faces.push( new THREE.Face3(76,77,78) );
+        PataAtras.faces.push( new THREE.Face3(77,78,79) );
+        PataAtras.faces.push( new THREE.Face3(78,79,80) );
+        PataAtras.faces.push( new THREE.Face3(79,80,81) );
+        PataAtras.faces.push( new THREE.Face3(80,81,82) );
+        PataAtras.faces.push( new THREE.Face3(81,82,83) );
+        PataAtras.faces.push( new THREE.Face3(82,83,84) );
+        
+        PataAtras.faces.push( new THREE.Face3(85,86,87) );
+        PataAtras.faces.push( new THREE.Face3(86,87,88) );
+        PataAtras.faces.push( new THREE.Face3(87,88,89) );
+        PataAtras.faces.push( new THREE.Face3(88,89,90) );
+        PataAtras.faces.push( new THREE.Face3(89,90,91) );
+        PataAtras.faces.push( new THREE.Face3(90,91,92) );
+        PataAtras.faces.push( new THREE.Face3(91,92,93) );
+        
+
+         var material2 = new THREE.MeshBasicMaterial( { 
+				color: 0xD8D8D8, 
+				metalness: 0.0, 
+				roughness: 5.1,
+				opacity: 50,
+				transparent: true, } );
+        material2.side = THREE.DoubleSide;
+        
+        var PataA = new THREE.Mesh( PataAtras, material2);
+        
+        //PataA.applyMatrix( new THREE.Matrix4().makeTranslation(3.368,0,0) );
+        
+        scene.add( PataA );
+
+//PATAS ADELANTE    
+        var PatasDelanteras = new THREE.Geometry();
+        var PieDelantero = new THREE.Geometry();
+        var PatasDelanteras_1 = new THREE.Geometry();
+        var PieDelantero_1 = new THREE.Geometry();
+        var Cola = new THREE.Geometry();
+        var Cuello = new THREE.Geometry();
+
+        var Cu0 = new THREE.Vector3(0.61949, 7.2627, -2.0292);
+        var Cu1 = new THREE.Vector3(-0.013906, 6.9382, -0.87409);
+        var Cu2 = new THREE.Vector3(0.25956, 8.1124, -3.3468);
+        var Cu3 = new THREE.Vector3(-0.40817, 8.2046, -3.3893);
+        var Cu4 = new THREE.Vector3(-0.61473, 7.2471, -1.9142);
+        var Cu5 = new THREE.Vector3(-0.013906, 6.9382, -0.87409);
+        var Cu6 = new THREE.Vector3(-1.1352, 6.079, -0.67788);
+        var Cu7 = new THREE.Vector3(-0.61473, 7.2471, -1.9142);
+        var Cu8 = new THREE.Vector3(-0.64147, 8.4592, -3.8123);
+        var Cu9 = new THREE.Vector3(-0.91902, 6.5657, -2.9809);
+        var Cu10 = new THREE.Vector3(-0.70655, 7.9426, -3.7986);
+        var Cu11 = new THREE.Vector3(-0.91902, 6.5657, -2.9809);
+        var Cu12 = new THREE.Vector3(-1.0314, 4.3257, -2.3712);
+        var Cu13 = new THREE.Vector3(-0.49568, 6.5946, -3.9967);
+        var Cu14 = new THREE.Vector3(-0.011391, 4.3954, -3.2071);
+        var Cu15 = new THREE.Vector3(0.237, 6.4317, -4.2011);
+        var Cu16 = new THREE.Vector3(0.99207, 4.4871, -2.5443);
+        var Cu17 = new THREE.Vector3(0.95611, 5.6787, -2.8637);
+        var Cu18 = new THREE.Vector3(1.3584, 4.6191, -1.9314);
+        var Cu19 = new THREE.Vector3(0.95611, 5.6787, -2.8637);
+        var Cu20 = new THREE.Vector3(0.237, 6.4317, -4.2011);
+        var Cu21 = new THREE.Vector3(1.2003, 6.4712, -2.2053);
+        var Cu22 = new THREE.Vector3(0.7382, 7.8215, -3.8446);
+        var Cu23 = new THREE.Vector3(0.61949, 7.2627, -2.0292);
+        var Cu24 = new THREE.Vector3(0.56232, 8.4888, -3.8151);
+        var Cu25 = new THREE.Vector3(0.61949, 7.2627, -2.0292);
+        var Cu26 = new THREE.Vector3(0.25956, 8.1124, -3.3468);
+        var Cu27 = new THREE.Vector3(-0.013906, 6.9382, -0.87409);
+        var Cu28 = new THREE.Vector3(0.61949, 7.2627, -2.0292);
+        var Cu29 = new THREE.Vector3(1.1356, 6.0539, -0.67357);
+        var Cu30 = new THREE.Vector3(1.2003, 6.4712, -2.2053);
+        var Cu31 = new THREE.Vector3(-0.91902, 6.5657, -2.9809);
+        var Cu32 = new THREE.Vector3(-1.3517, 6.2646, -2.0483);
+        var Cu33 = new THREE.Vector3(-0.61473, 7.2471, -1.9142);
+        var Cu34 = new THREE.Vector3(-1.1352, 6.079, -0.67788);
+
+        var PDD0 = new THREE.Vector3(0.9003, 6.5712, -2.2053);
+        var PDD1 = new THREE.Vector3(0.95611, 5.6787, -2.8637);
+        var PDD2 = new THREE.Vector3(1.3584, 4.6191, -1.9314);
+        var PDD3 = new THREE.Vector3(0.99207, 4.4871, -2.5443);
+        var PDD4 = new THREE.Vector3(0.85613, 2.9742, -1.7134);
+        var PDD5 = new THREE.Vector3(0.38553, 6.629, -1.5154);
+        var PDD6 = new THREE.Vector3(0.90871, 1.4768, -1.4872);
+        var PDD7 = new THREE.Vector3(0.38553, 4.5927, -1.5154);
+        var PDD8 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+        var PDD9 = new THREE.Vector3(0.38553, 6.5927, -1.5154);
+        var PDD10 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+        var PDD11 = new THREE.Vector3(0.76517, 4.0802, -0.74723);
+        var PDD12 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+        var PDD13 = new THREE.Vector3(1.2059, 3.620, -0.79557);
+        var PDD14 = new THREE.Vector3(1.0232, 1.6344, -0.91725);
+        var PDD15 = new THREE.Vector3(1.3584, 4.6191, -1.9314);
+        var PDD16 = new THREE.Vector3(0.90871, 1.4768, -1.4872);
+        var PDD17 = new THREE.Vector3(0.99207, 4.4871, -2.5443);
+        var PDD18 = new THREE.Vector3(0.9003, 6.5712, -2.2053);
+        var PDD19 = new THREE.Vector3(1.3584, 4.6191, -1.9314);
+        var PDD20 = new THREE.Vector3(1.1356, 6.0539, -0.67357);
+        var PDD21 = new THREE.Vector3(1.2059, 3.620, -0.79557);
+
+        var C0 = new THREE.Vector3(0.1815, 5.9956, 4.1864);
+        var C1 = new THREE.Vector3(0.053985, 5.4342, 8.585);
+        var C2 = new THREE.Vector3(-0.33138, 5.7573, 4.2099);
+        var C3 = new THREE.Vector3(-0.14132, 5.2519, 8.5789);
+        var C4 = new THREE.Vector3(-0.50317, 5.0162, 6.0512);
+        var C5 = new THREE.Vector3(-0.14132, 5.2519, 8.5789);
+        var C6 = new THREE.Vector3(0.001247, 4.5006, 6.1519);
+        var C7 = new THREE.Vector3(-0.14132, 5.2519, 8.5789);
+        var C8 = new THREE.Vector3(0.45045, 4.9808, 6.7639);
+        var C9 = new THREE.Vector3(0.053985, 5.4342, 8.585);
+        var C10 = new THREE.Vector3(0.1815, 5.9956, 4.1864);
+        var C11 = new THREE.Vector3(0.45045, 4.9808, 6.7639);
+        var C12 = new THREE.Vector3(0.026029, 5.3414, 4.2036);
+        var C13 = new THREE.Vector3(0.001247, 4.5006, 6.1519);
+        var C14 = new THREE.Vector3(0.026029, 5.3414, 4.2036);
+        var C15 = new THREE.Vector3(-0.50317, 5.0162, 6.0512);
+        var C16 = new THREE.Vector3(-0.33138, 5.7573, 4.2099);
+
+        var PD0 = new THREE.Vector3(-0.9003, 6.5712, -2.2053);
+        var PD1 = new THREE.Vector3(-0.91902, 5.6787, -2.8637);
+        var PD2 = new THREE.Vector3(-1.3866, 4.6602, -1.9422);
+        var PD3 = new THREE.Vector3(-1.0314, 4.3257, -2.3712);
+        var PD4 = new THREE.Vector3(-0.95931, 1.6707, -1.4605);
+        var PD5 = new THREE.Vector3(-0.44634, 6.629, -1.6832);
+        var PD6 = new THREE.Vector3(-0.85109, 0.69956, -1.2165);
+        var PD7 = new THREE.Vector3(-0.073973, 3.4603, -1.5888);
+        var PD8 = new THREE.Vector3(-0.85109, 0.69956, -1.2165);
+        var PD9 = new THREE.Vector3(-0.78801, 4.0609, -0.7444);
+        var PD10 = new THREE.Vector3(-0.85109, 0.69956, -1.2165);
+        var PD11 = new THREE.Vector3(-1.255, 3.718, -0.78666);
+        var PD12 = new THREE.Vector3(-1.0373, 1.6202, -0.91519);
+        var PD13 = new THREE.Vector3(-0.95931, 1.6707, -1.4605);
+        var PD14 = new THREE.Vector3(-1.255, 3.718, -0.78666);
+        var PD15 = new THREE.Vector3(-1.3866, 4.6602, -1.9422);
+        var PD16 = new THREE.Vector3(-1.1352, 6.079, -0.67788);
+        var PD17 = new THREE.Vector3(-0.9003, 6.2646, -2.0483);
+        var PD18 = new THREE.Vector3(-1.0314, 4.3257, -2.3712);
+        var PD19 = new THREE.Vector3(-1.3866, 4.6602, -1.9422);
+        var PD20 = new THREE.Vector3(-0.95931, 1.6707, -1.4605);
+        var PD21 = new THREE.Vector3(-1.0314, 4.3257, -2.3712); 
+
+        var Pd0 = new THREE.Vector3(-1.2772, 0.48287, -2.0022);
+        var Pd1 = new THREE.Vector3(-1.0373, 1.6202, -0.91519);
+        var Pd2 = new THREE.Vector3(-0.88628, 0.57108, -2.2585);
+        var Pd3 = new THREE.Vector3(-0.85109, 0.69956, -1.2165);
+        var Pd4 = new THREE.Vector3(-0.9572, 0.88601, -1.7166);
+        var Pd5 = new THREE.Vector3(-0.88628, 0.57108, -2.2585);
+        var Pd6 = new THREE.Vector3(-0.9572, 0.88601, -1.7166);
+        var Pd7 = new THREE.Vector3(-1.2772, 0.48287, -2.0022);
+        var Pd8 = new THREE.Vector3(-1.0373, 1.6202, -0.91519);
+        var Pd9 = new THREE.Vector3(-0.85109, 0.69956, -1.2165);
+        var Pd10 = new THREE.Vector3(-0.95931, 1.6707, -1.4605);
+        var Pd11 = new THREE.Vector3(-0.9572, 0.88601, -1.7166);
+
+        var Pdd0 = new THREE.Vector3(0.77055, 0.46656, -2.1848);
+        var Pdd1 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+        var Pdd2 = new THREE.Vector3(1.0133, 0.64494, -2.3004);
+        var Pdd3 = new THREE.Vector3(1.2354, 0.49902, -1.9079);
+        var Pdd4 = new THREE.Vector3(0.94067, 0.85671, -1.7644);
+        var Pdd5 = new THREE.Vector3(1.0133, 0.64494, -2.3004);
+        var Pdd6 = new THREE.Vector3(0.94067, 0.85671, -1.7644);
+        var Pdd7 = new THREE.Vector3(0.77055, 0.46656, -2.1848);
+        var Pdd8 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+        var Pdd9 = new THREE.Vector3(0.90871, 1.4768, -1.4872);
+        var Pdd10 = new THREE.Vector3(0.94067, 0.85671, -1.7644);
+        var Pdd11 = new THREE.Vector3(1.0232, 1.6344, -0.91725);
+        var Pdd12 = new THREE.Vector3(1.2354, 0.49902, -1.9079);
+        var Pdd13 = new THREE.Vector3(1.0232, 1.6344, -0.91725);
+        var Pdd14 = new THREE.Vector3(0.82492, 0.66502, -1.2488);
+
+        PatasDelanteras_1.vertices.push(PDD0); 
+        PatasDelanteras_1.vertices.push(PDD1); 
+        PatasDelanteras_1.vertices.push(PDD2);
+        PatasDelanteras_1.vertices.push(PDD3);
+        PatasDelanteras_1.vertices.push(PDD4);
+        PatasDelanteras_1.vertices.push(PDD5);
+        PatasDelanteras_1.vertices.push(PDD6);
+        PatasDelanteras_1.vertices.push(PDD7);
+        PatasDelanteras_1.vertices.push(PDD8);
+        PatasDelanteras_1.vertices.push(PDD9);
+        PatasDelanteras_1.vertices.push(PDD10);
+        PatasDelanteras_1.vertices.push(PDD11);
+        PatasDelanteras_1.vertices.push(PDD12);
+        PatasDelanteras_1.vertices.push(PDD13);
+        PatasDelanteras_1.vertices.push(PDD14);
+        PatasDelanteras_1.vertices.push(PDD15);
+        PatasDelanteras_1.vertices.push(PDD16);
+        PatasDelanteras_1.vertices.push(PDD17);
+        PatasDelanteras_1.vertices.push(PDD18);
+        PatasDelanteras_1.vertices.push(PDD19);
+        PatasDelanteras_1.vertices.push(PDD20);
+        PatasDelanteras_1.vertices.push(PDD21);
+
+        PatasDelanteras.vertices.push(PD0); 
+        PatasDelanteras.vertices.push(PD1); 
+        PatasDelanteras.vertices.push(PD2);
+        PatasDelanteras.vertices.push(PD3);
+        PatasDelanteras.vertices.push(PD4); 
+        PatasDelanteras.vertices.push(PD5);  
+        PatasDelanteras.vertices.push(PD6);  
+        PatasDelanteras.vertices.push(PD7);  
+        PatasDelanteras.vertices.push(PD8);  
+        PatasDelanteras.vertices.push(PD9);
+        PatasDelanteras.vertices.push(PD10); 
+        PatasDelanteras.vertices.push(PD11); 
+        PatasDelanteras.vertices.push(PD12);  
+        PatasDelanteras.vertices.push(PD13);  
+        PatasDelanteras.vertices.push(PD14); 
+        PatasDelanteras.vertices.push(PD15);
+        PatasDelanteras.vertices.push(PD16);  
+        PatasDelanteras.vertices.push(PD17);  
+        PatasDelanteras.vertices.push(PD18);  
+        PatasDelanteras.vertices.push(PD19);  
+        PatasDelanteras.vertices.push(PD20);  
+        PatasDelanteras.vertices.push(PD21);
+
+        PieDelantero.vertices.push(Pd0); 
+        PieDelantero.vertices.push(Pd1); 
+        PieDelantero.vertices.push(Pd2);
+        PieDelantero.vertices.push(Pd3);
+        PieDelantero.vertices.push(Pd4);
+        PieDelantero.vertices.push(Pd5);
+        PieDelantero.vertices.push(Pd6);
+        PieDelantero.vertices.push(Pd7);
+        PieDelantero.vertices.push(Pd8);
+        PieDelantero.vertices.push(Pd9);
+        PieDelantero.vertices.push(Pd10);
+        PieDelantero.vertices.push(Pd11);
+
+        PieDelantero_1.vertices.push(Pdd0); 
+        PieDelantero_1.vertices.push(Pdd1); 
+        PieDelantero_1.vertices.push(Pdd2);
+        PieDelantero_1.vertices.push(Pdd3);
+        PieDelantero_1.vertices.push(Pdd4);
+        PieDelantero_1.vertices.push(Pdd5);
+        PieDelantero_1.vertices.push(Pdd6);
+        PieDelantero_1.vertices.push(Pdd7);
+        PieDelantero_1.vertices.push(Pdd8);
+        PieDelantero_1.vertices.push(Pdd9);
+        PieDelantero_1.vertices.push(Pdd10);
+        PieDelantero_1.vertices.push(Pdd11);
+        PieDelantero_1.vertices.push(Pdd12);
+        PieDelantero_1.vertices.push(Pdd13);
+        PieDelantero_1.vertices.push(Pdd14);
+
+        Cola.vertices.push(C0); 
+        Cola.vertices.push(C1); 
+        Cola.vertices.push(C2);
+        Cola.vertices.push(C3);
+        Cola.vertices.push(C4);
+        Cola.vertices.push(C5);
+        Cola.vertices.push(C6);
+        Cola.vertices.push(C7);
+        Cola.vertices.push(C8);
+        Cola.vertices.push(C9);
+        Cola.vertices.push(C10);
+        Cola.vertices.push(C11);
+        Cola.vertices.push(C12);
+        Cola.vertices.push(C13);
+        Cola.vertices.push(C14);
+        Cola.vertices.push(C15);
+        Cola.vertices.push(C16);
+
+        Cuello.vertices.push(Cu0); 
+        Cuello.vertices.push(Cu1); 
+        Cuello.vertices.push(Cu2);
+        Cuello.vertices.push(Cu3);
+        Cuello.vertices.push(Cu4);
+        Cuello.vertices.push(Cu5);
+        Cuello.vertices.push(Cu6);
+        Cuello.vertices.push(Cu7);
+        Cuello.vertices.push(Cu8);
+        Cuello.vertices.push(Cu9);
+        Cuello.vertices.push(Cu10);
+        Cuello.vertices.push(Cu11);
+        Cuello.vertices.push(Cu12);
+        Cuello.vertices.push(Cu13);
+        Cuello.vertices.push(Cu14);
+        Cuello.vertices.push(Cu15);
+        Cuello.vertices.push(Cu16);
+        Cuello.vertices.push(Cu17);
+        Cuello.vertices.push(Cu18);
+        Cuello.vertices.push(Cu19);
+        Cuello.vertices.push(Cu20);
+        Cuello.vertices.push(Cu21);
+        Cuello.vertices.push(Cu22);
+        Cuello.vertices.push(Cu23);
+        Cuello.vertices.push(Cu24);
+        Cuello.vertices.push(Cu25);
+        Cuello.vertices.push(Cu26);
+        Cuello.vertices.push(Cu27);
+        Cuello.vertices.push(Cu28);
+        Cuello.vertices.push(Cu29);
+        Cuello.vertices.push(Cu30);
+        Cuello.vertices.push(Cu31);
+        Cuello.vertices.push(Cu32);
+        Cuello.vertices.push(Cu33);
+        Cuello.vertices.push(Cu34);
+
+        PatasDelanteras_1.faces.push( new THREE.Face3(0,1,2) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(1,2,3) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(2,3,4) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(3,4,5) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(4,5,6) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(5,6,7) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(6,7,8) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(7,8,9) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(8,9,10) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(9,10,11) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(10,11,12) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(11,12,13) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(12,13,14) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(13,14,15) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(14,15,16) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(14,15,16) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(15,16,17) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(16,17,18) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(17,18,19) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(18,19,20) );
+        PatasDelanteras_1.faces.push( new THREE.Face3(19,20,21) );
+
+        PatasDelanteras.faces.push( new THREE.Face3(0,1,2) );
+        PatasDelanteras.faces.push( new THREE.Face3(1,2,3) );
+        PatasDelanteras.faces.push( new THREE.Face3(2,3,4) );
+        PatasDelanteras.faces.push( new THREE.Face3(3,4,5) );
+        PatasDelanteras.faces.push( new THREE.Face3(4,5,6) );
+        PatasDelanteras.faces.push( new THREE.Face3(5,6,7) );
+        PatasDelanteras.faces.push( new THREE.Face3(6,7,8) );
+        PatasDelanteras.faces.push( new THREE.Face3(7,8,9) );
+        PatasDelanteras.faces.push( new THREE.Face3(8,9,10) );
+        PatasDelanteras.faces.push( new THREE.Face3(9,10,11) );
+        PatasDelanteras.faces.push( new THREE.Face3(10,11,12) );
+        PatasDelanteras.faces.push( new THREE.Face3(11,12,13) );
+        PatasDelanteras.faces.push( new THREE.Face3(12,13,14) );
+        PatasDelanteras.faces.push( new THREE.Face3(13,14,15) );
+        PatasDelanteras.faces.push( new THREE.Face3(13,14,16) );
+        PatasDelanteras.faces.push( new THREE.Face3(14,16,17) );
+        PatasDelanteras.faces.push( new THREE.Face3(16,17,18) );
+        PatasDelanteras.faces.push( new THREE.Face3(17,18,19) );
+        PatasDelanteras.faces.push( new THREE.Face3(18,19,20) );
+        PatasDelanteras.faces.push( new THREE.Face3(19,20,21) );
+
+        PieDelantero.faces.push( new THREE.Face3(0,1,2) );
+        PieDelantero.faces.push( new THREE.Face3(1,2,3) );
+        PieDelantero.faces.push( new THREE.Face3(2,3,4) );
+        PieDelantero.faces.push( new THREE.Face3(3,4,5) );
+        PieDelantero.faces.push( new THREE.Face3(4,5,6) );
+        PieDelantero.faces.push( new THREE.Face3(5,6,7) );
+        PieDelantero.faces.push( new THREE.Face3(6,7,8) );
+        PieDelantero.faces.push( new THREE.Face3(7,8,9) );
+        PieDelantero.faces.push( new THREE.Face3(8,9,10) );
+        PieDelantero.faces.push( new THREE.Face3(9,10,11) );
+
+        PieDelantero_1.faces.push( new THREE.Face3(0,1,2) );
+        PieDelantero_1.faces.push( new THREE.Face3(1,2,3) );
+        PieDelantero_1.faces.push( new THREE.Face3(2,3,4) );
+        PieDelantero_1.faces.push( new THREE.Face3(3,4,5) );
+        PieDelantero_1.faces.push( new THREE.Face3(4,5,6) );
+        PieDelantero_1.faces.push( new THREE.Face3(5,6,7) );
+        PieDelantero_1.faces.push( new THREE.Face3(6,7,8) );
+        PieDelantero_1.faces.push( new THREE.Face3(7,8,9) );
+        PieDelantero_1.faces.push( new THREE.Face3(8,9,10) );
+        PieDelantero_1.faces.push( new THREE.Face3(9,10,11) );
+        PieDelantero_1.faces.push( new THREE.Face3(10,11,12) );
+        PieDelantero_1.faces.push( new THREE.Face3(11,12,13) );
+        PieDelantero_1.faces.push( new THREE.Face3(12,13,14) );
+
+
+        Cola.faces.push( new THREE.Face3(0,1,2) );
+        Cola.faces.push( new THREE.Face3(1,2,3) );
+        Cola.faces.push( new THREE.Face3(2,3,4) );
+        Cola.faces.push( new THREE.Face3(3,4,5) );
+        Cola.faces.push( new THREE.Face3(4,5,6) );
+        Cola.faces.push( new THREE.Face3(5,6,7) );
+        Cola.faces.push( new THREE.Face3(6,7,8) );
+        Cola.faces.push( new THREE.Face3(7,8,9) );
+        Cola.faces.push( new THREE.Face3(8,9,10) );
+        Cola.faces.push( new THREE.Face3(9,10,11) );
+        Cola.faces.push( new THREE.Face3(10,11,12) );
+        Cola.faces.push( new THREE.Face3(11,12,13) );
+        Cola.faces.push( new THREE.Face3(12,13,14) );
+        Cola.faces.push( new THREE.Face3(13,14,15) );
+        Cola.faces.push( new THREE.Face3(14,15,16) );
+
+        Cuello.faces.push( new THREE.Face3(0,1,2) );
+        Cuello.faces.push( new THREE.Face3(1,2,3) );
+        Cuello.faces.push( new THREE.Face3(2,3,4) );
+        Cuello.faces.push( new THREE.Face3(3,4,5) );
+        Cuello.faces.push( new THREE.Face3(4,5,6) );
+        Cuello.faces.push( new THREE.Face3(5,6,7) );
+        Cuello.faces.push( new THREE.Face3(6,7,8) );
+        Cuello.faces.push( new THREE.Face3(7,8,9) );
+        Cuello.faces.push( new THREE.Face3(8,9,10) );
+        Cuello.faces.push( new THREE.Face3(9,10,11) );
+        Cuello.faces.push( new THREE.Face3(10,11,12) );
+        Cuello.faces.push( new THREE.Face3(11,12,13) );
+        Cuello.faces.push( new THREE.Face3(12,13,14) );
+        Cuello.faces.push( new THREE.Face3(13,14,15) );
+        Cuello.faces.push( new THREE.Face3(14,15,16) );
+        Cuello.faces.push( new THREE.Face3(15,16,17) );
+        Cuello.faces.push( new THREE.Face3(16,17,18) );
+        Cuello.faces.push( new THREE.Face3(17,18,19) );
+        Cuello.faces.push( new THREE.Face3(18,19,20) );
+        Cuello.faces.push( new THREE.Face3(19,20,21) );
+        Cuello.faces.push( new THREE.Face3(20,21,22) );
+        Cuello.faces.push( new THREE.Face3(21,22,23) );
+        Cuello.faces.push( new THREE.Face3(22,23,24) );
+        Cuello.faces.push( new THREE.Face3(23,24,25) );
+        Cuello.faces.push( new THREE.Face3(24,25,26) );
+        Cuello.faces.push( new THREE.Face3(25,26,27) );
+        Cuello.faces.push( new THREE.Face3(26,27,28) );
+        Cuello.faces.push( new THREE.Face3(27,28,29) );
+        Cuello.faces.push( new THREE.Face3(28,29,30) );
+        Cuello.faces.push( new THREE.Face3(29,30,31) );
+        Cuello.faces.push( new THREE.Face3(30,31,32) );
+        Cuello.faces.push( new THREE.Face3(31,32,33) );
+        Cuello.faces.push( new THREE.Face3(32,33,34) );
+
+
+
+              
+ /*       strip = new TRIANGLE_STRIP(PatasDelanteras);
+        strip.draw();
+        strip = new TRIANGLE_STRIP(PieDelantero);
+        strip.draw();
+        strip = new TRIANGLE_STRIP(Cola);
+        strip.draw();
+        strip = new TRIANGLE_STRIP(PatasDelanteras_1);
+        strip.draw();
+        strip = new TRIANGLE_STRIP(PieDelantero_1);
+        strip.draw();       */
+
+        
+        
+         var materialCara1 = new THREE.MeshBasicMaterial( { 
+				color: 0xD8D8D8, 
+				metalness: 0.0, 
+				roughness: 5.1,
+				opacity: 50,
+				transparent: true, } );
+        materialCara1.side = THREE.DoubleSide;
+
+        var MallaPatasDelanteras_1 = new THREE.Mesh( PatasDelanteras_1, materialCara1);
+			var MallaPatasDelanteras = new THREE.Mesh( PatasDelanteras, materialCara1);
+			var MallaPieDelantero = new THREE.Mesh( PieDelantero, materialCara1);
+			var MallaPieDelantero_1 = new THREE.Mesh( PieDelantero_1, materialCara1);
+			var MallaCola = new THREE.Mesh( Cola, materialCara1);
+			var MallaCuello = new THREE.Mesh( Cuello, materialCara1);
+                        PieDelantero.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,0) );
+                        PatasDelanteras.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,0) );
+                        scene.add(MallaPatasDelanteras);
+                        scene.add(MallaPatasDelanteras_1);
+                        scene.add(MallaPieDelantero);
+                        scene.add(MallaPieDelantero_1);
+                        scene.add(MallaCola);
+                        scene.add(MallaCuello);
+            
+			//MOVER LA CÁMARA
+			camera.position.x = 0;
+			camera.position.y = 0;	 
+		  	camera.position.z = 30;			
+		  	camera.lookAt( origin );
+			}
+    
+    function animate() {
+        requestAnimationFrame( animate );
+        controls.update();
+        render();
+    }
+    
+    function render(){
+        renderer.render( scene, camera );
+    }
+    </script>
+  </body>
+</html>

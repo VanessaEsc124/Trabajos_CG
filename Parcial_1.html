@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+    <cabeza>
+<meta charset= "utf-8">
+        <title>Parcial1</title>
+        <style>
+            html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+                text-align: center;
+                color: #FFFFFF;
+            }
+        </style>
+    </cabeza>
+    <body>
+<div id="Stats-salida">
+</div>
+        <div id="info">Arana<br/>
+            Usar flecha arriba y abajo para trasladar.<br/>
+            Usar flechas laterales para rotar.<br/>
+        </div>
+    <script src="js/three.min.js"></script>
+    <script>
+		var scene, aspect, camera, renderer;
+		var geometry1, geometry2, geometry3, geometry4, geometry5;
+		var cabeza, torso, cuerpo;
+		var PiernaDer, PiernaIzq;
+var sol;
+var frente, edificioA, puente, edificioB, edificioC, edificioD, edificioDd, edificioE;
+var grada1, grada2, grada3;
+var leyenda, piso, piso1, calle;
+var cancha;
+		var startTime = Date.now();
+				
+		var upArrow = false;
+		var downArrow = false;
+		var leftArrow = false;
+		var rightArrow = false;				
+		var up = false;
+		var down = false;
+		var left = false;
+		var right = false;
+		var thetaSum=0;
+		var positivo=false;
+		
+		init();
+		animate();
+	
+		function init(){
+			scene = new THREE.Scene();
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			//EVENTOS DE TECLADO
+			
+			var onKeyDown = function ( event ) {
+				switch ( event.keyCode ) {
+					case 40: // DOWN
+						upArrow = true;
+down = true;
+						break;
+					case 38: //UP
+						downArrow = true;
+up = true;
+						break;
+					case 39: //RIGHT
+						upArrow = true;
+right = true;
+						break;
+					case 37: //LEFT
+						downArrow = true;
+left = true;
+						break;
+				}
+			}
+			var onKeyUp = function ( event ) {
+				switch ( event.keyCode ) {
+					case 40: //DOWN
+						upArrow = false;
+down = true;
+						break;
+					case 38: // UP
+						downArrow = false;
+up = true;
+						break;
+					case 39: //RIGHT
+						upArrow = false;
+right = true;
+						break;
+					case 37: //LEFT
+						downArrow = false;
+left = true;
+						break;
+				}
+			}
+			document.addEventListener( 'keydown', onKeyDown, false );
+			document.addEventListener( 'keyup', onKeyUp, false );
+			
+			//ELEMENTOS DE ESCENA
+							  
+			var size = 20;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0xA4A4A4 );
+		  	var colorR = new THREE.Color( 0xFF0000 );
+		  	var colorG = new THREE.Color( 0x00FF00 );
+		  	var colorB = new THREE.Color( 0x0000FF );
+			var colorRd = new THREE.Color( 0x8A4B08 );
+		  	var colorGd = new THREE.Color( 0x8A4B08 );
+		  	var colorBd = new THREE.Color( 0x61380B );
+		  	var colorEdi = new THREE.Color( 0xFE9A2E );
+			var colorEd = new THREE.Color( 0xB45F04 );
+			var colorE = new THREE.Color( 0x61380B );
+			var colorLeyenda = new THREE.Color( 0xF3E2A9 );
+			var colorPiso = new THREE.Color( 0x688A08 );
+			var colorCalle = new THREE.Color( 0x585858 );
+			var colorSol = new THREE.Color( 0xF7FE2E );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper1 = new THREE.AxesHelper( size/10 );
+			var axesHelper2 = new THREE.AxesHelper( size/10 );
+			var axesHelper3 = new THREE.AxesHelper( size/10 );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            //gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            //gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            //gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+			
+			//CREAR LAS GEOMETRÍAS
+			geometry1 = new THREE.CubeGeometry( 1, 1, 1);	//CUBO
+			for ( var i = 0; i < geometry1.faces.length; i ++ ) {
+				switch(i){
+					case 0: case 1: geometry1.faces[ i ].color = colorEdi; break;
+					case 2: case 3: geometry1.faces[ i ].color = colorEdi; break;
+					case 4: case 5: geometry1.faces[ i ].color = colorEd; break;
+					case 6: case 7: geometry1.faces[ i ].color = colorEd; break;
+					case 8: case 9: geometry1.faces[ i ].color = colorE; break;
+					case 10: case 11: geometry1.faces[ i ].color = colorE; break;
+				}				
+			}
+			geometry2 = new THREE.CylinderGeometry( .5, .5, 1, 32 ); //CILINDRO
+			for ( var i = 0; i < geometry2.faces.length; i++) { 
+					geometry2.faces[i].color = colorE;
+					geometry2.faces[i].color = colorEd; 
+			}
+
+geometry3 = new THREE.SphereGeometry( 1, 32, 32); //ESFERA
+for ( var i = 0; i < geometry3.faces.length; i ++ ) {
+switch(i){
+case 0: case 1: geometry3.faces[ i ].color = colorSol; break;
+case 2: case 3: geometry3.faces[ i ].color = colorSol; break;
+case 4: case 5: geometry3.faces[ i ].color = colorSol; break;
+case 6: case 7: geometry3.faces[ i ].color = colorSol; break;
+case 8: case 9: geometry3.faces[ i ].color = colorSol; break;
+case 10: case 11: geometry3.faces[ i ].color = colorSol; break;
+}
+
+var geometry4 = new THREE.ConeGeometry( 5, 20, 32 );	//CONO
+
+var geometry5 = new THREE.PlaneGeometry( 5, 20, 32 ); 	//PLANO
+
+}
+			
+			//CREAR LOS MATERIALES
+			var material = new THREE.MeshBasicMaterial( { color: color1, vertexColors: THREE.FaceColors } );
+			var materialLeyenda = new THREE.MeshBasicMaterial( { color: colorLeyenda } );
+			var materialPlane = new THREE.MeshBasicMaterial( { color: colorPiso } );
+			var materialPlaneC = new THREE.MeshBasicMaterial( { color: colorCalle } );
+			var materialSol = new THREE.MeshBasicMaterial( { color: colorSol } );
+			//CREAR LOS OBJETOS
+			leyenda = new THREE.Mesh( geometry4, materialLeyenda ); //CONO
+
+			frente = new THREE.Mesh( geometry1, material );	//CUBO
+			edificioA = frente.clone();
+			edificioB = frente.clone();
+			edificioC = frente.clone();
+			edificioD = frente.clone();
+			edificioDd = frente.clone();
+			edificioE = frente.clone();
+			grada1 = frente.clone();
+			grada2 = frente.clone();
+			grada3 = frente.clone();
+		
+			torso = new THREE.Mesh( geometry2, material ); //CILINDRO
+			cabeza = torso.clone();
+			PiernaIzq = torso.clone();
+			PiernaDer = torso.clone();
+			puente = torso.clone();	
+
+			sol = new THREE.Mesh( geometry3, materialSol );	//ESFERA
+	
+			piso = new THREE.Mesh( geometry5, materialPlane ); //PLANO
+			piso1 = piso.clone();
+			calle = new THREE.Mesh( geometry5, materialPlaneC ); //PLANO
+
+			frente.applyMatrix( new THREE.Matrix4().makeScale(9,3,1) );
+			frente.applyMatrix( new THREE.Matrix4().makeTranslation(-4.5,1.5,-4.5) );
+
+			edificioA.applyMatrix( new THREE.Matrix4().makeScale(3,4,5) );
+			edificioA.applyMatrix( new THREE.Matrix4().makeTranslation(8,2,-7) );
+
+			edificioB.applyMatrix( new THREE.Matrix4().makeScale(2,3,4) );
+			edificioB.applyMatrix( new THREE.Matrix4().makeTranslation(-.5,1.5,-7) );
+
+			edificioC.applyMatrix( new THREE.Matrix4().makeScale(2,3,4) );
+			edificioC.applyMatrix( new THREE.Matrix4().makeTranslation(-5,1.5,-7) );
+
+			edificioD.applyMatrix( new THREE.Matrix4().makeScale(2,3,4) );
+			edificioD.applyMatrix( new THREE.Matrix4().makeTranslation(-9,1.5,-7) );
+
+			edificioDd.applyMatrix( new THREE.Matrix4().makeScale(.5,3,2) );
+			edificioDd.applyMatrix( new THREE.Matrix4().makeTranslation(-9.8,1.5,-5) );
+
+			edificioE.applyMatrix( new THREE.Matrix4().makeScale(10,4,1) );
+			edificioE.applyMatrix( new THREE.Matrix4().makeTranslation(-5,2,-9.5) );
+
+			puente.applyMatrix( new THREE.Matrix4().makeScale(1.8,8,1.8) );
+			puente.applyMatrix( new THREE.Matrix4().makeTranslation(3,2,-8) );
+			puente.rotateZ(THREE.Math.degToRad(90));
+
+			grada1.applyMatrix( new THREE.Matrix4().makeScale(8,1.2,.5) );
+			grada1.applyMatrix( new THREE.Matrix4().makeTranslation(4,.5,-7) );
+
+			grada2.applyMatrix( new THREE.Matrix4().makeScale(8,.6,.5) );
+			grada2.applyMatrix( new THREE.Matrix4().makeTranslation(4,.5,-6.5) );
+
+			grada3.applyMatrix( new THREE.Matrix4().makeScale(8,.3,.5) );
+			grada3.applyMatrix( new THREE.Matrix4().makeTranslation(4,.5,-6) );
+
+			leyenda.applyMatrix( new THREE.Matrix4().makeScale(.8,.1,.5) );
+			leyenda.applyMatrix( new THREE.Matrix4().makeTranslation(4,1.5,-1.5) );
+
+			torso.applyMatrix( new THREE.Matrix4().makeScale(.2,.2,.2) );
+			torso.applyMatrix( new THREE.Matrix4().makeTranslation(3,1,5) );
+
+			cabeza.applyMatrix( new THREE.Matrix4().makeScale(.8,.8,.8) );
+			cabeza.applyMatrix( new THREE.Matrix4().makeTranslation(0,1,0) );
+
+			PiernaIzq.applyMatrix( new THREE.Matrix4().makeScale(.2,1,.2) );
+			PiernaIzq.applyMatrix( new THREE.Matrix4().makeTranslation(-.5,-1,0) );
+
+			PiernaDer.applyMatrix( new THREE.Matrix4().makeScale(.2,1,.2) );
+			PiernaDer.applyMatrix( new THREE.Matrix4().makeTranslation(.5,-1,0) );
+
+			piso.applyMatrix( new THREE.Matrix4().makeScale(2.3,1,5) );
+			piso.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,-4.2) );
+			piso.rotateZ(THREE.Math.degToRad(90));
+			piso.rotateY(THREE.Math.degToRad(90));
+
+			piso1.applyMatrix( new THREE.Matrix4().makeScale(1,1,1) );
+			piso1.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,8) );
+			piso1.rotateZ(THREE.Math.degToRad(90));
+			piso1.rotateY(THREE.Math.degToRad(90));
+
+			calle.applyMatrix( new THREE.Matrix4().makeScale(.8,1,1) );
+			calle.applyMatrix( new THREE.Matrix4().makeTranslation(0,0,3.5) );
+			calle.rotateZ(THREE.Math.degToRad(90));
+			calle.rotateY(THREE.Math.degToRad(90));
+
+			sol.applyMatrix( new THREE.Matrix4().makeScale(1,1,1) );
+			sol.applyMatrix( new THREE.Matrix4().makeTranslation(3,10,0) );
+
+			torso.add(cabeza);
+			torso.add(PiernaIzq);
+			torso.add(PiernaDer);
+		
+		  	//AGREGAR A LA ESCENA
+            scene.add( gridHelperXZ );
+		  	scene.add( arrowX );	
+		  	scene.add( arrowY );	
+		  	scene.add( arrowZ );	
+			scene.add( sol );
+		  	scene.add( frente );
+		  	scene.add( edificioA );	
+		  	scene.add( edificioB );	
+		  	scene.add( edificioC );	
+		  	scene.add( edificioD );	
+		  	scene.add( edificioDd );	
+		  	scene.add( edificioE );		
+		  	scene.add( puente );	
+			scene.add( grada1 );
+			scene.add( grada2 );
+			scene.add( grada3 );
+			scene.add( leyenda );
+			scene.add( piso );
+			scene.add( piso1 );
+			scene.add( calle );
+			scene.add( torso );
+			
+			//MOVER LA CAMARA
+			camera.position.x = 20;
+			camera.position.y = 15;	 
+		  	camera.position.z = 20;			
+		  	camera.lookAt( origin );
+			
+			renderer.render( scene, camera );
+}
+    
+    function animate() {
+        render();
+        requestAnimationFrame( animate );
+    }
+var i=0;
+    function render(){
+		var tx=0, ty=0, tz=0;	//Variables para traslacion
+		var sc = 1;				//Variable para escala
+		var theta=0;			//Variable para ángulo de rotacion de piernas
+		var sigma=0;			//Variable para ángulo de rotación de caderas
+
+		//MATRIZ DE TRASLACIÓN
+		var t = new THREE.Matrix4();
+		t.set( 	1, 0, 0, tx,
+				0, 1, 0, ty, 
+				0, 0, 1, tz,
+				0, 0, 0, 1	);
+		
+
+		torso.matrix.multiply(t); 	//APLICAR LA TRASLACIÓN A NIVEL LOCAL
+		
+		//ROTACIONES
+		var ct1 = Math.cos(theta);
+		var ct2 = Math.cos(-theta);
+		var cs = Math.cos(sigma);
+		var st1 = Math.sin(theta);
+		var st2 = Math.sin(-theta);
+		var ss = Math.sin(sigma);
+		var r = new THREE.Matrix4();
+		var r1 = new THREE.Matrix4();
+		var r11 = new THREE.Matrix4();
+		var r2 = new THREE.Matrix4();
+
+		//MATRIZ DE ROTACIÓN EN EJE Y
+		r.set( 	   cs,  0, ss, 0,
+					0,  1,  0, 0, 
+				  -ss,  0, cs, 0,
+					0,  0,  0, 1 );	
+		//MATRICES DE ROTACIÓN EN EJE LOCAL DE PIERNAS	
+		r1.set( 	1,  0,  0, 0,
+					0, ct1,-st1, 0, 
+					0, st1, ct1, 0,
+					0,  0,  0, 1 );	
+		r11.set( 	1,  0,  0, 0,
+					0, ct1, -st1, 0, 
+					0, st1, ct1, 0,
+					0,  0,  0, 1 );	
+		r2.set( 	1,  0,  0, 0,
+					0, ct2,-st2, 0, 
+					0, st2, ct2, 0,
+					0,  0,  0, 1 );							
+		
+		//ROTACION EN UN EJE PARALELO
+		var tempMatrix = new THREE.Matrix4();
+		tempMatrix.copyPosition( torso.matrix );
+		torso.applyMatrix( new THREE.Matrix4().getInverse(tempMatrix) );
+		torso.applyMatrix(r);
+		torso.applyMatrix( tempMatrix )
+
+		PiernaIzq.applyMatrix(r1);
+		PiernaDer.applyMatrix(r2);
+
+	//var dtime = Date.now()-startTime; //Movimiento
+	//camera.position.x = 30*Math.cos(dtime/10000); //Movimiento
+	//camera.position.z = 30*Math.sin(dtime/10000);//Movimiento				
+       //camera.lookAt( 0, 0, 0 );
+
+requestAnimationFrame(render);
+sol.position.x = Math.cos(i * .001)*12;
+sol.position.y = Math.sin(i * .001)*12;
+        renderer.render( scene, camera );
+i++;
+    }
+
+render();
+
+    </script>
+  </body>
+</html>

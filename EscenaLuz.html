@@ -1,0 +1,426 @@
+ <!DOCTYPE html>
+<html>
+  <head>
+    <title>Escena</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+#info {
+				color: #000;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+    </style>
+  </head>
+  <body>
+<div id="info">
+        <strong>Vanessa Escobar Mora </strong>
+    </div>
+      <script src="js/three.js"></script>
+      <script src="js/controls/OrbitControls.js"></script>
+      <script src='js/libs/dat.gui.min.js'></script>
+      <script src="js/THREE.CSG.js"></script>
+      <script>
+          var scene, aspect, camera, camera2, renderer, controls;
+          var mapWidth = 320, mapHeight = 240;
+          var w = window.innerWidth, h = window.innerHeight;
+          var frustumSize = 5;
+          var startTime = Date.now();
+
+          init();
+          animate();
+
+          function init(){
+          scene = new THREE.Scene();
+          scene.background = new THREE.Color( 0xAAAAAA );
+          aspect = window.innerWidth / window.innerHeight;
+          camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+          renderer = new THREE.WebGLRenderer({antialias: true});
+          renderer.setSize( window.innerWidth, window.innerHeight );
+          document.body.appendChild( renderer.domElement );
+          controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+          var size = 10;
+          var arrowSize = 10;
+          var divisions = 20;
+          var origin = new THREE.Vector3( 0, 0, 0 );
+          var x = new THREE.Vector3( 1, 0, 0 );
+          var y = new THREE.Vector3( 0, 1, 0 );
+          var z = new THREE.Vector3( 0, 0, 1 );
+          var color = new THREE.Color( 0x333333 );
+          var colorR = new THREE.Color( 0xAA3333 );
+          var colorG = new THREE.Color( 0x33AA33 );
+          var colorB = new THREE.Color( 0x333366 );
+
+          //CREAR LAS GRILLAS PARA EL ESCENARIO
+          var axesHelper = new THREE.AxesHelper( arrowSize );
+          scene.add( axesHelper );
+
+          var gridHelperXZ = new THREE.GridHelper( size, divisions, color, color );
+          scene.add( gridHelperXZ );
+
+          //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+          gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+
+          //CREAR ILUMINACIÓN
+          var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+          scene.add( ambient );
+          
+          var LightGeometry = new THREE.SphereGeometry(.3,16,8);
+          var pointLight = new THREE.PointLight( 0xffffff, 10, 100 );
+          var matLight = new THREE.MeshStandardMaterial( { emissive: 0xFFFFFF, emissiveIntensity: 5, color: 0xFFFFFF  } );
+          pointLight.add( new THREE.Mesh( LightGeometry, matLight ) );
+          pointLight.position.set( -5, 5, -15 );
+          scene.add( pointLight );
+          
+          var LightGeometry1 = new THREE.BoxGeometry(.3,.5,.05);
+          var pointLight1 = new THREE.PointLight( 0xFFFF00, 3, 20, 2 );
+          var matLight1 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 2, color: 0xFFFF00  } );
+          pointLight1.add( new THREE.Mesh( LightGeometry1, matLight1 ) );
+          pointLight1.position.set( 1.5, .3, -.15 );
+          scene.add( pointLight1 );
+          
+          var LightGeometry2 = new THREE.SphereGeometry(.05,16,5);
+          var pointLight2 = new THREE.PointLight( 0xFFFF00, 1, 10 );
+          var matLight2 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 1, color: 0xFFFF00  } );
+          pointLight2.add( new THREE.Mesh( LightGeometry2, matLight2 ) );
+          pointLight2.position.set( -2.2, .5, 2.5 );
+          scene.add( pointLight2 );
+          
+          var LightGeometry3 = new THREE.SphereGeometry(.05,16,5);
+          var pointLight3 = new THREE.PointLight( 0xFFFF00, 1, 10 );
+          var matLight3 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 1, color: 0xFFFF00  } );
+          pointLight3.add( new THREE.Mesh( LightGeometry3, matLight3 ) );
+          pointLight3.position.set( -.8, .5, 2 );
+          scene.add( pointLight3 );
+          
+          var LightGeometry4 = new THREE.SphereGeometry(.05,16,5);
+          var pointLight4 = new THREE.PointLight( 0xFFFF00, 1, 10 );
+          var matLight4 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 1, color: 0xFFFF00  } );
+          pointLight4.add( new THREE.Mesh( LightGeometry4, matLight4 ) );
+          pointLight4.position.set( -.4, .5, 3.2 );
+          scene.add( pointLight4 );
+          
+          var LightGeometry5 = new THREE.SphereGeometry(.05,16,5);
+          var pointLight5 = new THREE.PointLight( 0xFFFF00, 1, 10 );
+          var matLight5 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 1, color: 0xFFFF00  } );
+          pointLight5.add( new THREE.Mesh( LightGeometry5, matLight5 ) );
+          pointLight5.position.set( .8, .5, 2 );
+          scene.add( pointLight5 );
+          
+          var LightGeometry6 = new THREE.SphereGeometry(.05,16,5);
+          var pointLight6 = new THREE.PointLight( 0xFFFF00, 1, 10 );
+          var matLight6 = new THREE.MeshStandardMaterial( { emissive: 0xFFFF00, emissiveIntensity: 1, color: 0xFFFF00  } );
+          pointLight6.add( new THREE.Mesh( LightGeometry6, matLight6 ) );
+          pointLight6.position.set( 1.5, .5, 3.3  );
+          scene.add( pointLight6 );
+          
+            
+
+          //CREAR LOS MATERIALES
+          var matAgua = new THREE.MeshStandardMaterial( { color: 0x0B0B61, metalness: 0.5, roughness: 0.1 } );
+          var matBotes = new THREE.MeshStandardMaterial( { color: 0x190B07, metalness: 0.5, roughness: 0.1 } );
+          var matMontañas = new THREE.MeshStandardMaterial( { color: 0x181407, metalness: 1.5, roughness: 0.5 } );
+          var matEdificios = new THREE.MeshStandardMaterial( { color: 0x191007, metalness: 0.5, roughness: .5 } );
+          var matPuente = new THREE.MeshStandardMaterial( { color: 0x2A1B0A, metalness: 0.5, roughness: .5 } );
+          var matTecho = new THREE.MeshStandardMaterial( { color: 0x151515, metalness: 0.5, roughness: .5 } );
+          var material3 = new THREE.MeshStandardMaterial( { color: 0x3333AA, metalness: 0.5, roughness: 0.1 } );
+          matAgua.side = THREE.DoubleSide;
+          matBotes.side = THREE.DoubleSide;
+          material3.side = THREE.DoubleSide;
+
+          //CUBO EN EL ESPACIO
+          var sphereGeometry = new THREE.SphereGeometry(.5,32,32);
+          var boxGeometry = new THREE.BoxGeometry(1,1,1);
+          var boxGeometry1 = new THREE.BoxGeometry(.5,1,1);
+          var boxGeometry2 = new THREE.BoxGeometry(.3,.5,.5);
+          var Agua = new THREE.PlaneGeometry(10,11,10);
+          var Montaña = new THREE.CylinderGeometry(.5,2,1.5,8);
+          var Montaña1 = new THREE.CylinderGeometry(.5,1,1.2,8);
+          var Edificio = new THREE.CylinderGeometry(.7,.7,2,32);
+          var Edificio1 = new THREE.BoxGeometry(3,1,1.3);
+          var Puente = new THREE.BoxGeometry(2,.2,.3);
+          var Cono = new THREE.ConeGeometry(.7,2,20);
+          var Entrada = new THREE.BoxGeometry(.5,.5,1);
+          var Entrada1 = new THREE.BoxGeometry(.2,.4,1);
+          var Palos = new THREE.CylinderGeometry(.01,.01,.5);
+
+          var sphere = new THREE.Mesh( sphereGeometry, material3 );
+          var box = new THREE.Mesh( boxGeometry, material3 );
+          var box1 = new THREE.Mesh( boxGeometry1, material3 );
+          var box2 = box1.clone();
+          var box3 = new THREE.Mesh( boxGeometry2, material3 );
+          var agua = new THREE.Mesh( Agua, matAgua );
+          var montaña = new THREE.Mesh( Montaña, matMontañas );
+          var m1 = montaña.clone();
+          var m2 = montaña.clone();
+          var m3 = montaña.clone();
+          var m4 = montaña.clone();
+          var m5 = montaña.clone();
+          var m6 = montaña.clone();
+          var montaña1 = new THREE.Mesh( Montaña1, matMontañas );
+          var edificio = new THREE.Mesh( Edificio, matEdificios );
+          var e1 = edificio.clone();
+          var e2 = edificio.clone();
+          var e3 = edificio.clone();
+          var e4 = edificio.clone();
+          var e5 = edificio.clone();
+          var e6 = edificio.clone();
+          var edificio1 = new THREE.Mesh( Edificio1, matEdificios );
+          var ed1 = edificio1.clone();
+          var puente = new THREE.Mesh( Puente, matPuente );
+          var cono = new THREE.Mesh( Cono, matTecho );
+          var cono1 = cono.clone();
+          var cono2 = cono.clone();
+          var cono3 = cono.clone();
+          var cono4 = cono.clone();
+          var cono5 = cono.clone();
+          var cono6 = cono.clone();
+          var cono7 = cono.clone();
+          var entrada = new THREE.Mesh( Entrada, matEdificios );
+          var entrada1 = new THREE.Mesh( Entrada1, matEdificios );
+          var palos = new THREE.Mesh( Palos, matBotes );
+          var p1 = palos.clone();
+          var p2 = palos.clone();
+          var p3 = palos.clone();
+          var p4 = palos.clone();
+          
+		    box.translateY( .2 );
+		    box1.translateX( .5 );
+		    box2.translateX( -.5 );
+		    box3.translateY( -.15 );
+		    agua.translateZ( -.5 );
+		    agua.rotateX( 1.570 );
+			montaña.applyMatrix( new THREE.Matrix4().makeScale(1.3,1.3,1.3) );
+		    montaña.translateX( 2.5 );
+		    montaña.translateY( 1 );
+		    montaña.translateZ( -3 );
+			m1.applyMatrix( new THREE.Matrix4().makeScale(1.3,1.3,1.3) );
+		    m1.translateX( 1 );
+		    m1.translateY( 1 );
+		    m1.translateZ( -3 );
+		    m2.translateX( 2 );
+		    m2.translateY( .75 );
+		    m2.translateZ( -2 );
+		    m3.translateX( 0 );
+		    m3.translateY( .75 );
+		    m3.translateZ( -2 );
+			m4.applyMatrix( new THREE.Matrix4().makeScale(.7,.7,.7) );
+		    m4.translateX( -2 );
+		    m4.translateY( .55 );
+		    m4.translateZ( -2 );
+			m5.applyMatrix( new THREE.Matrix4().makeScale(.9,.9,.9) );
+		    m5.translateX( -1.5 );
+		    m5.translateY( .75 );
+		    m5.translateZ( -3 );
+			m6.applyMatrix( new THREE.Matrix4().makeScale(.5,.5,.5) );
+		    m6.translateX( -3 );
+		    m6.translateY( .4 );
+		    m6.translateZ( -2.5 );
+			montaña1.applyMatrix( new THREE.Matrix4().makeScale(1.5,1.5,1.5) );
+		    montaña1.translateX( 3.5 );
+		    montaña1.translateY( .9 );
+		    montaña1.translateZ( -.5 );
+		    edificio.translateX( 1 );
+		    edificio.translateY( 2.5 );
+		    edificio.translateZ( -3.5 );
+			cono.applyMatrix( new THREE.Matrix4().makeScale(1.2,1,1.2) );
+		    cono.translateX( 1 );
+		    cono.translateY( 4.5 );
+		    cono.translateZ( -3.5 )
+			e1.applyMatrix( new THREE.Matrix4().makeScale(.4,.4,.4) );
+		    e1.translateX( .2 );
+		    e1.translateY( 1.7 );
+		    e1.translateZ( -2.3 );
+			cono1.applyMatrix( new THREE.Matrix4().makeScale(.5,.4,.5) );
+		    cono1.translateX( .2 );
+		    cono1.translateY( 2.5 );
+		    cono1.translateZ( -2.3 )
+			e2.applyMatrix( new THREE.Matrix4().makeScale(.6,.6,.6) );
+		    e2.translateX( 3 );
+		    e2.translateY( 2.5 );
+		    e2.translateZ( -3 );
+			cono2.applyMatrix( new THREE.Matrix4().makeScale(.7,.6,.7) );
+		    cono2.translateX( 3 );
+		    cono2.translateY( 3.7 );
+		    cono2.translateZ( -3 );
+			e3.applyMatrix( new THREE.Matrix4().makeScale(.5,.6,.5) );
+		    e3.translateX( 2 );
+		    e3.translateY( 2 );
+		    e3.translateZ( -2.3 );
+			cono3.applyMatrix( new THREE.Matrix4().makeScale(.6,.6,.6) );
+		    cono3.translateX( 2 );
+		    cono3.translateY( 3.2 );
+		    cono3.translateZ( -2.3 );
+			e4.applyMatrix( new THREE.Matrix4().makeScale(.4,1.3,.4) );
+		    e4.translateX( .2 );
+		    e4.translateY( 1.5 );
+		    e4.translateZ( -3 );
+			cono4.applyMatrix( new THREE.Matrix4().makeScale(.5,.5,.5) );
+		    cono4.translateX( .2 );
+		    cono4.translateY( 3.3 );
+		    cono4.translateZ( -3 );
+			e5.applyMatrix( new THREE.Matrix4().makeScale(.4,1.5,.4) );
+		    e5.translateX( 3.8 );
+		    e5.translateY( 1.5 );
+		    e5.translateZ( -.8 );
+			cono5.applyMatrix( new THREE.Matrix4().makeScale(.45,.4,.45) );
+		    cono5.translateX( 3.8 );
+		    cono5.translateY( 3.4 );
+		    cono5.translateZ( -.8 );
+			e6.applyMatrix( new THREE.Matrix4().makeScale(.3,1.3,.3) );
+		    e6.translateX( 2.2 );
+		    e6.translateY( 1.5 );
+		    e6.translateZ( -.5 );
+			cono6.applyMatrix( new THREE.Matrix4().makeScale(.35,.6,.35) );
+		    cono6.translateX( 2.2 );
+		    cono6.translateY( 3.4 );
+		    cono6.translateZ( -.5 );
+		    edificio1.translateX( 1.7 );
+		    edificio1.translateY( 2 );
+		    edificio1.translateZ( -3 )
+			ed1.applyMatrix( new THREE.Matrix4().makeScale(.6,2,2.5) );
+		    ed1.translateX( 3 );
+		    ed1.translateY( 1.3 );
+		    ed1.translateZ( -2.3 )
+		    puente.translateX( 1.2 );
+		    puente.translateY( 1.41 );
+		    puente.translateZ( -1.8 )
+			cono7.applyMatrix( new THREE.Matrix4().makeScale( .6,.2,.8 ) );
+		    cono7.translateX( 1.5 );
+		    cono7.translateY( .7 );
+		    cono7.translateZ( -.5 );          
+          
+		    palos.translateX( -2.2 );
+		    palos.translateY( .3 );
+		    palos.translateZ( 2.5 );
+		    p1.translateX( -.8 );
+		    p1.translateY( .3 );
+		    p1.translateZ( 2 );
+		    p2.translateX( -.4 );
+		    p2.translateY( .3 );
+		    p2.translateZ( 3.2 );
+		    p3.translateX( .8 );
+		    p3.translateY( .3 );
+		    p3.translateZ( 2 );
+		    p4.translateX( 1.5 );
+		    p4.translateY( .3 );
+		    p4.translateZ( 3.3 );
+            
+
+          var sphereCSG = THREE.CSG.fromMesh( sphere );
+          var boxCSG = THREE.CSG.fromMesh( box );
+          var box1CSG = THREE.CSG.fromMesh( box1 );
+          var box2CSG = THREE.CSG.fromMesh( box2 );
+          var box3CSG = THREE.CSG.fromMesh( box3 );
+          var entradaCSG = THREE.CSG.fromMesh( entrada );
+          var entrada1CSG = THREE.CSG.fromMesh( entrada1 );
+
+          var result1 = sphereCSG.subtract( boxCSG ).subtract( box1CSG ).subtract( box2CSG ).subtract( box3CSG );
+          var result6 = entradaCSG.subtract( entrada1CSG );
+
+          var r1 = THREE.CSG.toMesh( result1 );
+          var r2 = r1.clone();
+          var r3 = r1.clone();
+          var r4 = r1.clone();
+          var r5 = r1.clone();
+          var r6 = THREE.CSG.toMesh( result6 );
+
+          r1.material = matBotes;
+          r2.material = matBotes;
+          r3.material = matBotes;
+          r4.material = matBotes;
+          r5.material = matBotes;
+          r6.material = matEdificios;
+
+          r1.translateX( -2.2 );
+          r1.translateY( .5 );
+          r1.translateZ( 2.5 );
+          r1.rotateY( -0.5236 );
+          r2.translateX( -.8 );
+          r2.translateY( .5 );
+          r2.translateZ( 2 );
+          r2.rotateY( -0.5236 );
+          r3.translateX( -.4 );
+          r3.translateY( .5 );
+          r3.translateZ( 3.2 );
+          r3.rotateY( -0.3491 );
+          r4.translateX( .8 );
+          r4.translateY( .5 );
+          r4.translateZ( 2 );
+          r4.rotateY( -0.1745 );
+          r5.translateX( 1.5 );
+          r5.translateY( .5 );
+          r5.translateZ( 3.3 );
+          r6.rotateY( 0.3491 );
+          r6.translateX( 1.5 );
+          r6.translateY( .25 );
+          r6.translateZ( 0 );
+
+          scene.add( r1 );
+          scene.add( r2 );
+          scene.add( r3 );
+          scene.add( r4 );
+          scene.add( r5 );
+          scene.add( r5 );
+          scene.add( r6 );
+          scene.add( agua );
+          scene.add( montaña );
+          scene.add( m1 );
+          scene.add( m2 );
+          scene.add( m3 );
+          scene.add( m4 );
+          scene.add( m5 );
+          scene.add( m6 );
+          scene.add( montaña1 );
+          scene.add( edificio );
+          scene.add( e1 );
+          scene.add( e2 );
+          scene.add( e3 );
+          scene.add( e4 );
+          scene.add( e5 );
+          scene.add( e6 );
+          scene.add( edificio1 );
+          scene.add( ed1 );
+          scene.add( puente );
+          scene.add( cono );
+          scene.add( cono1 );
+          scene.add( cono2 );
+          scene.add( cono3 );
+          scene.add( cono4 );
+          scene.add( cono5 );
+          scene.add( cono6 );
+          scene.add( cono7 );
+          scene.add( palos );
+          scene.add( p1 );
+          scene.add( p2 );
+          scene.add( p3 );
+          scene.add( p4 );
+
+          camera.position.x = 2;
+          camera.position.y = 2;
+          camera.position.z = 5;
+          camera.lookAt( origin );
+          }
+          function animate() {
+          requestAnimationFrame( animate );
+          controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
+          render();
+          }
+          function render() {
+          renderer.render( scene, camera );
+          }
+      </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
